@@ -1,7 +1,12 @@
-{"scripts": {
-  "start": "node server.js"
-},
-"main": "server.js",
+{
   "engines": {
-    "node": "12.13.1"
-  }}
+    "node": "12.x"
+  },
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
