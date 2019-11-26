@@ -1,6 +1,8 @@
 var socket = io();
+var playerName = prompt("Choose a name...", "Unnamed Cat");
 
-socket.emit('new player');
+
+socket.emit('new player', playerName);
 
 socket.on('connect', function() {
   console.log("Me: " + socket.id);
@@ -37,19 +39,51 @@ var controller = {
           case 37:// left key
               if (controller.left.state != key_state) controller.left.active = key_state;
               controller.left.state  = key_state;
-              socket.emit('controls', controller);
+              socket.emit('controls', controller, playerName);
               break;
           case 38:// up key
               if (controller.up.state != key_state) controller.up.active = key_state;
               controller.up.state  = key_state;
-              socket.emit('controls', controller);
+              socket.emit('controls', controller, playerName);
               break;
           case 39:// right key
               if (controller.right.state != key_state) controller.right.active = key_state;
               controller.right.state  = key_state;
-              socket.emit('controls', controller);
+              socket.emit('controls', controller, playerName);
               break;
       }
+  },
+
+  touchHandler:function(event) {
+    if (event.touches) {
+        touchList = {};
+        for (var i in event.touches) {
+            touchList[i] = [event.touches[i].pageX - canvas.offsetLeft, event.touches[i].pageY - canvas.offsetTop];
+        }
+    }
+    controller.left.state = false;
+    controller.left.active = false;
+    controller.up.state = false;
+    controller.up.active = false;
+    controller.right.state = false;
+    controller.right.active = false;
+    for (i in touchList) {
+        touchX = touchList[i][0];
+        touchY = touchList[i][1];
+    if (touchX >= 20 && touchX <= 80 && touchY >= height-20-80 && touchY <= height-20) {
+            if (controller.left.state != true) controller.left.active = true;
+            controller.left.state = true;
+        }
+        if (touchX >= 100 && touchX <= 160 && touchY >= height-20-80 && touchY <= height-20) {	
+            if (controller.right.state != true) controller.right.active = true;
+            controller.right.state = true;
+        }
+        if (touchX >= width-20-60 && touchX <= width-20 && touchY >= height-20-80 && touchY <= height-20) {		
+            if (controller.up.state != true) controller.up.active = true;
+            controller.up.state = true;
+        }
+    }
+    socket.emit('controls', controller, playerName);
   }
 };
 var version = "3.0";
@@ -81,6 +115,9 @@ var touchList = [];
 sprite_sheet.image.src = "/static/cat_sprite_orange.png";
 window.addEventListener("keydown", controller.keyUpDown);
 window.addEventListener("keyup", controller.keyUpDown);
+window.addEventListener("touchstart", controller.touchHandler);
+window.addEventListener("touchmove", controller.touchHandler);
+window.addEventListener("touchend", controller.touchHandler);
 
 function reDrawPlayers() {
   ctx.clearRect(0,0,width,height)
@@ -89,15 +126,15 @@ function reDrawPlayers() {
     reDrawShadow(localPlayerList[key]);
   }
 
-  if (localPlayerList[playerID]) {
-    reDrawUI(localPlayerList[playerID]);
+  if (localPlayerList[playerName]) {
+    reDrawUI(localPlayerList[playerName]);
   }
   for (var key in localPlayerList) {
-    if (key != playerID) {
+    if (key != playerName) {
       render(localPlayerList[key]);
     }
-    if (localPlayerList[playerID]) {
-      render(localPlayerList[playerID]);
+    if (localPlayerList[playerName]) {
+      render(localPlayerList[playerName]);
     }
   }
 }
@@ -233,7 +270,7 @@ function reDrawShadow(player) {
 }
 function render (player) {
   // ctx.fillText(player.animation.frame,player.x,player.y-36)
-  ctx.fillText(player.name,player.x+60,player.y-10)
+  ctx.fillText(player.name,player.x+40,player.y-10)
   //ctx.fillText(player.status,player.x,player.y-20)
   // touchString = ""
   // for (i in touchList) {
