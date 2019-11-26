@@ -4,32 +4,34 @@ var http = require('http');
 var path = require('path');
 var socketIO = require('socket.io');var app = express();
 var server = http.Server(app);
-var io = socketIO(server);app.set('port', 5000);
+var io = socketIO(server);app.set('port', 3000);
 app.use('/static', express.static(__dirname + '/static'));// Routing
 app.get('/', function(request, response) {
 response.sendFile(path.join(__dirname, 'index.html'));
 
 });// Starts the server.
-server.listen(5000, function() {
-  console.log('Starting server on port 5000');
+server.listen(3000, function() {
+  console.log('Starting server on port 3000');
 });
 
 // Add the WebSocket handlers
 io.on('connection', function(socket) {
-    socket.on('new player', function() {
-        console.log("Player created: " + socket.id);
-        if (!playerList[socket.id]) {
-            createPlayer(socket.id,socket.id.substring(1, 6),300,height-100,120,80,0,0,"#d0d0d0");
+    socket.on('new player', function(playerName) {
+        if (!playerList[playerName]) {
+            console.log("Player created: " + playerName + " [" + socket.id + "]");
+            createPlayer(playerName,playerName,300,height-100,120,80,0,0,"#d0d0d0");
+        } else {
+            console.log("Player resumed: " + playerName + " [" + socket.id + "]");
         }
     });
-    socket.on('controls', function(controls) {
-        if (playerList[socket.id]) {
-            playerList[socket.id].controller.leftActive = controls.left.active;
-            playerList[socket.id].controller.leftState = controls.left.state;
-            playerList[socket.id].controller.rightActive = controls.right.active;
-            playerList[socket.id].controller.rightState = controls.right.state;
-            playerList[socket.id].controller.upActive = controls.up.active;
-            playerList[socket.id].controller.upState = controls.up.state;
+    socket.on('controls', function(controls, playerName) {
+        if (playerList[playerName]) {
+            playerList[playerName].controller.leftActive = controls.left.active;
+            playerList[playerName].controller.leftState = controls.left.state;
+            playerList[playerName].controller.rightActive = controls.right.active;
+            playerList[playerName].controller.rightState = controls.right.state;
+            playerList[playerName].controller.upActive = controls.up.active;
+            playerList[playerName].controller.upState = controls.up.state;
         }   
     });
 });
