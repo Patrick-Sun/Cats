@@ -34,6 +34,25 @@ io.on('connection', function(socket) {
             playerList[playerName].controller.upState = controls.up.state;
         }   
     });
+    socket.on('chat', function(playerName) {
+        if (playerList[playerName]) {
+            playerList[playerName].typing = !playerList[playerName].typing;
+        }
+        if (playerList[playerName].typing) {
+            playerList[playerName].message = "";
+        }
+    });
+    socket.on('message', function(keyCode, playerName) {
+        if (playerList[playerName]) {
+            if (keyCode == 8) {
+                if (playerList[playerName].message.length > 0) {
+                    playerList[playerName].message = playerList[playerName].message.substring(0, playerList[playerName].message.length - 1);
+                }
+              } else if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || keyCode==32) {
+                playerList[playerName].message = playerList[playerName].message + String.fromCharCode(keyCode).toLowerCase();
+            }
+        }
+    });
 });
 
 
@@ -71,7 +90,9 @@ function createPlayer(id,name,x,y,width,height,spdX,spdY,color) {
         to_sleep_frame:0,
         from_sleep_frame:0,
         waking:true,
-        status:"loading..."
+        status:"loading...",
+        typing:false,
+        message:""
     };
     playerList[id] = player;
 }

@@ -1,7 +1,6 @@
 var socket = io();
 var playerName = prompt("Choose a name...", "Unnamed Cat");
 
-
 socket.emit('new player', playerName);
 
 socket.on('connect', function() {
@@ -51,6 +50,17 @@ var controller = {
               controller.right.state  = key_state;
               socket.emit('controls', controller, playerName);
               break;
+          case 13://enter key
+            if (key_state) {
+              socket.emit('chat', playerName);
+              break;
+            }
+      }
+
+      if (localPlayerList[playerName] && localPlayerList[playerName].typing) {
+          if (key_state) {
+            socket.emit('message', event.keyCode, playerName);
+          }
       }
   },
 
@@ -270,7 +280,15 @@ function reDrawShadow(player) {
 }
 function render (player) {
   // ctx.fillText(player.animation.frame,player.x,player.y-36)
-  ctx.fillText(player.name,player.x+40,player.y-10)
+  ctx.font = "bold 12px Arial"
+  ctx.fillStyle = "rgb(120, 120, 120)";
+  if (player.typing) {
+    ctx.fillText("[msg]:" + player.message,player.x,player.y-30);
+  }
+
+  ctx.font = "16px Arial"
+  ctx.fillStyle = "rgb(200, 200, 200)";
+  ctx.fillText(player.name,player.x,player.y-10);
   //ctx.fillText(player.status,player.x,player.y-20)
   // touchString = ""
   // for (i in touchList) {
