@@ -307,7 +307,7 @@ function render (player) {
       ctx.fillText("[" + player.messageTime + "] " + player.message2,player.x,player.y-50);
       if (player.typing) {
         ctx.fillStyle = "rgb(200, 200, 200)";
-        ctx.fillText("[typing...]",player.x,player.y-65);
+        ctx.fillText("[typing...]",player.x,player.y-66);
       }
     } else {
       if (player.typing) {
@@ -316,7 +316,7 @@ function render (player) {
       }
     }
   }
-
+  
   ctx.font = "16px Arial";
   ctx.fillStyle = "rgb(200, 200, 200)";
   ctx.fillText(player.name,player.x,player.y-30);
