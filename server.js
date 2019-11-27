@@ -22,6 +22,9 @@ io.on('connection', function(socket) {
             createPlayer(playerName,playerName,300,height-100,120,80,0,0,"#d0d0d0");
         } else {
             console.log("Player resumed: " + playerName + " [" + socket.id + "]");
+            playerList[playerName].typing = false;
+            playerList[playerName].message = "";
+            playerList[playerName].message2 = "";
         }
     });
     socket.on('controls', function(controls, playerName) {
@@ -34,12 +37,15 @@ io.on('connection', function(socket) {
             playerList[playerName].controller.upState = controls.up.state;
         }   
     });
-    socket.on('chat', function(playerName) {
+    socket.on('chat', function(timestamp, playerName) {
         if (playerList[playerName]) {
             playerList[playerName].typing = !playerList[playerName].typing;
         }
         if (playerList[playerName].typing) {
             playerList[playerName].message = "";
+        } else {
+            playerList[playerName].message2 = playerList[playerName].message;
+            playerList[playerName].messageTime = timestamp;
         }
     });
     socket.on('message', function(keyCode, playerName) {
@@ -92,7 +98,9 @@ function createPlayer(id,name,x,y,width,height,spdX,spdY,color) {
         waking:true,
         status:"loading...",
         typing:false,
-        message:""
+        message:"",
+        message2:"",
+        messageTime:""
     };
     playerList[id] = player;
 }

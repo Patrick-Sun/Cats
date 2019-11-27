@@ -1,5 +1,9 @@
 var socket = io();
 var playerName = prompt("Choose a name...", "Unnamed Cat");
+if (playerName == "") {
+  playerName = "Unnamed Cat";
+}
+var date = new Date();
 
 socket.emit('new player', playerName);
 
@@ -52,7 +56,7 @@ var controller = {
               break;
           case 13://enter key
             if (key_state) {
-              socket.emit('chat', playerName);
+              socket.emit('chat', date.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric"}), playerName);
               break;
             }
       }
@@ -279,16 +283,43 @@ function reDrawShadow(player) {
   drawEllipse(ctx, player.x+(player.width/2)-(100*(1-(height-100-player.y)/(height-100)))/2, height-28-(12*(1-(height-100-(50)-player.y)/(height-100-(50))))/2, 100*(1-(height-100-player.y)/(height-100)), 12*(1-(height-100-(50)-player.y)/(height-100-(50))));
 }
 function render (player) {
-  // ctx.fillText(player.animation.frame,player.x,player.y-36)
-  ctx.font = "bold 12px Arial"
-  ctx.fillStyle = "rgb(120, 120, 120)";
-  if (player.typing) {
-    ctx.fillText("[msg]:" + player.message,player.x,player.y-30);
+  if (player.name == playerName) {
+    ctx.font = "12px Arial"
+    ctx.fillStyle = "rgb(120, 120, 120)";
+    if (player.typing) {
+      ctx.fillText("[msg]: " + player.message,player.x,player.y-50);
+      if (player.message2 != "") {
+        ctx.fillStyle = "rgb(120, 120, 120)";
+        ctx.fillText("[" + player.messageTime + "] " + player.message2,player.x,player.y-65);
+      }
+    } else {
+      ctx.fillStyle = "rgb(200, 200, 200)";
+      ctx.fillText("[Press enter to type]",player.x,player.y-50);
+      ctx.fillStyle = "rgb(120, 120, 120)";
+      if (player.message2 != "") {
+        ctx.fillText("[" + player.messageTime + "] " + player.message2,player.x,player.y-65);
+      }
+    }
+  } else {
+    ctx.font = "bold 12px Arial"
+    if (player.message2 != "") {
+      ctx.fillStyle = "rgb(120, 120, 120)";
+      ctx.fillText("[" + player.messageTime + "] " + player.message2,player.x,player.y-50);
+      if (player.typing) {
+        ctx.fillStyle = "rgb(200, 200, 200)";
+        ctx.fillText("[typing...]",player.x,player.y-65);
+      }
+    } else {
+      if (player.typing) {
+        ctx.fillStyle = "rgb(200, 200, 200)";
+        ctx.fillText("[typing...]",player.x,player.y-50);
+      }
+    }
   }
 
-  ctx.font = "16px Arial"
+  ctx.font = "16px Arial";
   ctx.fillStyle = "rgb(200, 200, 200)";
-  ctx.fillText(player.name,player.x,player.y-10);
+  ctx.fillText(player.name,player.x,player.y-30);
   //ctx.fillText(player.status,player.x,player.y-20)
   // touchString = ""
   // for (i in touchList) {
