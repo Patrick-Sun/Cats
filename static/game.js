@@ -284,7 +284,7 @@ function reDrawShadow(player) {
 }
 function render (player) {
   if (player.name == playerName) {
-    ctx.font = "12px Arial"
+    ctx.font = "bold 12px Arial"
     ctx.fillStyle = "rgb(120, 120, 120)";
     if (player.typing) {
       ctx.fillText("[msg]: " + player.message,player.x,player.y-50);
