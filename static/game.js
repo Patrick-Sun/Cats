@@ -1,7 +1,8 @@
 var socket = io();
-var room = prompt("Enter room number...");
+randRoom = Math.floor(Math.random() * 9999);
+var room = prompt("Enter room number...", randRoom);
 if (room == "") {
-  room = Math.floor(Math.random() * 9999);
+  room = randRoom
 }
 
 var playerName = prompt("Choose a name...", "Unnamed Cat");
