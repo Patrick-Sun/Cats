@@ -1,17 +1,25 @@
 var socket = io();
+var room = prompt("Enter room number...");
+if (room == "") {
+  room = Math.floor(Math.random() * 9999);
+}
+
 var playerName = prompt("Choose a name...", "Unnamed Cat");
 if (playerName == "") {
   playerName = "Unnamed Cat";
 }
 var date = new Date();
 
-socket.emit('new player', playerName);
+socket.emit('new player', room, playerName);
 
 socket.on('connect', function() {
   console.log("Me: " + socket.id);
   playerID = socket.id;
 });
 
+setInterval(function() {
+  socket.emit('update', room);
+}, 15);
 
 var sprite_sheet = {
   frame_sets:[[0,1,2,1],                  //0.idle        [4|5]
@@ -42,28 +50,28 @@ var controller = {
           case 37:// left key
               if (controller.left.state != key_state) controller.left.active = key_state;
               controller.left.state  = key_state;
-              socket.emit('controls', controller, playerName);
+              socket.emit('controls', room, controller, playerName);
               break;
           case 38:// up key
               if (controller.up.state != key_state) controller.up.active = key_state;
               controller.up.state  = key_state;
-              socket.emit('controls', controller, playerName);
+              socket.emit('controls', room, controller, playerName);
               break;
           case 39:// right key
               if (controller.right.state != key_state) controller.right.active = key_state;
               controller.right.state  = key_state;
-              socket.emit('controls', controller, playerName);
+              socket.emit('controls', room, controller, playerName);
               break;
           case 13://enter key
             if (key_state) {
-              socket.emit('chat', date.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric"}), playerName);
+              socket.emit('chat', room, date.toLocaleTimeString('en-US', { hour12: false, hour: "numeric", minute: "numeric"}), playerName);
               break;
             }
       }
 
       if (localPlayerList[playerName] && localPlayerList[playerName].typing) {
           if (key_state) {
-            socket.emit('message', event.keyCode, playerName);
+            socket.emit('message', room, event.keyCode, playerName);
           }
       }
   },
@@ -97,7 +105,7 @@ var controller = {
             controller.up.state = true;
         }
     }
-    socket.emit('controls', controller, playerName);
+    socket.emit('controls', room, controller, playerName);
   }
 };
 var version = "3.0";
@@ -222,8 +230,9 @@ function reDrawUI(player) {
   ctx.fillStyle = "rgb(200, 200, 200)";
   // ctx.fillText("cat_simulator_v".concat(version),width-148,30);
   // ctx.fillText(player.status,width-148,50);
-  ctx.fillText("cat_simulator_v".concat(version),20,30);
-  ctx.fillText("state: " + player.status,20,50);
+  // ctx.fillText("cat_simulator_v".concat(version),20,30);
+  // ctx.fillText("state: " + player.status,20,50);
+  ctx.fillText("Room: " +room,20,30);
 
 }
 function roundRect(ctx, x, y, width, height, radius, fill, stroke) {

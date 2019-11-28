@@ -16,47 +16,57 @@ server.listen(3000, function() {
 
 // Add the WebSocket handlers
 io.on('connection', function(socket) {
-    socket.on('new player', function(playerName) {
-        if (!playerList[playerName]) {
-            console.log("Player created: " + playerName + " [" + socket.id + "]");
-            createPlayer(playerName,playerName,300,height-100,120,80,0,0,"#d0d0d0");
+    socket.on('new player', function(room, playerName) {
+        if (!roomList[room]) {
+            createRoom(room);
+            console.log("Created room [" + room + "] (" + socket.id + ")");
+        }
+
+        if (!roomList[room][playerName]) {
+            console.log("Created player [" + playerName + "] in room [" + room + "] ("+ socket.id + ")");
+            createPlayer(room, playerName,playerName,300,height-100,120,80,0,0,"#d0d0d0");
         } else {
-            console.log("Player resumed: " + playerName + " [" + socket.id + "]");
-            playerList[playerName].typing = false;
-            playerList[playerName].message = "";
-            playerList[playerName].message2 = "";
+            console.log("Resumed player [" + playerName + "] in room [" + room + "] ("+ socket.id + ")");
+            roomList[room][playerName].typing = false;
+            roomList[room][playerName].message = "";
+            roomList[room][playerName].message2 = "";
         }
     });
-    socket.on('controls', function(controls, playerName) {
-        if (playerList[playerName]) {
-            playerList[playerName].controller.leftActive = controls.left.active;
-            playerList[playerName].controller.leftState = controls.left.state;
-            playerList[playerName].controller.rightActive = controls.right.active;
-            playerList[playerName].controller.rightState = controls.right.state;
-            playerList[playerName].controller.upActive = controls.up.active;
-            playerList[playerName].controller.upState = controls.up.state;
+    socket.on('controls', function(room, controls, playerName) {
+        if (roomList[room][playerName]) {
+            roomList[room][playerName].controller.leftActive = controls.left.active;
+            roomList[room][playerName].controller.leftState = controls.left.state;
+            roomList[room][playerName].controller.rightActive = controls.right.active;
+            roomList[room][playerName].controller.rightState = controls.right.state;
+            roomList[room][playerName].controller.upActive = controls.up.active;
+            roomList[room][playerName].controller.upState = controls.up.state;
         }   
     });
-    socket.on('chat', function(timestamp, playerName) {
-        if (playerList[playerName]) {
-            playerList[playerName].typing = !playerList[playerName].typing;
+    socket.on('chat', function(room, timestamp, playerName) {
+        if (roomList[room][playerName]) {
+            roomList[room][playerName].typing = !roomList[room][playerName].typing;
         }
-        if (playerList[playerName].typing) {
-            playerList[playerName].message = "";
+        if (roomList[room][playerName].typing) {
+            roomList[room][playerName].message = "";
         } else {
-            playerList[playerName].message2 = playerList[playerName].message;
-            playerList[playerName].messageTime = timestamp;
+            roomList[room][playerName].message2 = roomList[room][playerName].message;
+            roomList[room][playerName].messageTime = timestamp;
         }
     });
-    socket.on('message', function(keyCode, playerName) {
-        if (playerList[playerName]) {
+    socket.on('message', function(room, keyCode, playerName) {
+        if (roomList[room][playerName]) {
             if (keyCode == 8) {
-                if (playerList[playerName].message.length > 0) {
-                    playerList[playerName].message = playerList[playerName].message.substring(0, playerList[playerName].message.length - 1);
+                if (roomList[room][playerName].message.length > 0) {
+                    roomList[room][playerName].message = roomList[room][playerName].message.substring(0, roomList[room][playerName].message.length - 1);
                 }
               } else if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || keyCode==32) {
-                playerList[playerName].message = playerList[playerName].message + String.fromCharCode(keyCode).toLowerCase();
+                roomList[room][playerName].message = roomList[room][playerName].message + String.fromCharCode(keyCode).toLowerCase();
             }
+        }
+    });
+    socket.on('update', function(room) {
+        if (roomList[room]) {
+            io.sockets.emit('state', roomList[room]);
         }
     });
 });
@@ -65,9 +75,13 @@ io.on('connection', function(socket) {
 
 var height = 300;
 var width = 1000;
-var playerList = {};
+var roomList = {};
 
-function createPlayer(id,name,x,y,width,height,spdX,spdY,color) {
+function createRoom(id) {
+    roomList[id] = {};
+}
+
+function createPlayer(room,id,name,x,y,width,height,spdX,spdY,color) {
     var player = {
         x:x,
         y:y,
@@ -102,7 +116,7 @@ function createPlayer(id,name,x,y,width,height,spdX,spdY,color) {
         message2:"",
         messageTime:""
     };
-    playerList[id] = player;
+    roomList[room][id] = player;
 }
 
 setInterval(function() {
@@ -110,12 +124,15 @@ setInterval(function() {
 }, 15);
 
 function updatePlayers() {
-    for (var key in playerList) {
-      updateCharacter(playerList[key]);
+    for (var room in roomList) {
+        for (var key in roomList[room]) {
+        updateCharacter(roomList[room][key]);
+        }
     }
-    io.sockets.emit('state', playerList);
-    for (var key in playerList) {
-        playerList[key].animation.update();
+    for (var room in roomList) {
+        for (var key in roomList[room]) {
+            roomList[room][key].animation.update();
+        }
     }
 }
 
