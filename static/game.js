@@ -18,10 +18,6 @@ socket.on('connect', function() {
   playerID = socket.id;
 });
 
-setInterval(function() {
-  socket.emit('update', room);
-}, 15);
-
 var sprite_sheet = {
   frame_sets:[[0,1,2,1],                  //0.idle        [4|5]
               [0,1,2,3,4,5,6],			//1.jump right  [9|11]
@@ -119,7 +115,7 @@ var version = "3.0";
 // });
 
 
-socket.on('state', function(playerList) {
+socket.on('state_' + room, function(playerList) {
     localPlayerList = playerList;
     // updatePlayers();
     reDrawPlayers();

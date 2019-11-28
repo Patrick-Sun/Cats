@@ -69,11 +69,6 @@ io.on('connection', function(socket) {
             }
         }
     });
-    socket.on('update', function(room) {
-        if (roomList[room]) {
-            io.sockets.emit('state', roomList[room]);
-        }
-    });
 });
 
 
@@ -126,6 +121,9 @@ function createPlayer(room,id,name,x,y,width,height,spdX,spdY,color) {
 
 setInterval(function() {
     updatePlayers();
+    for (room in roomList) {
+        io.sockets.emit('state_' + room, roomList[room]);
+    }
 }, 15);
 
 function updatePlayers() {
