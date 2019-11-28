@@ -61,6 +61,11 @@ io.on('connection', function(socket) {
                 }
               } else if ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || keyCode==32) {
                 roomList[room][playerName].message = roomList[room][playerName].message + String.fromCharCode(keyCode).toLowerCase();
+
+                roomList[room][playerName].sleep_frame = 0;
+                if (roomList[room][playerName].sleep) {
+                    roomList[room][playerName].waking = true;
+                }
             }
         }
     });
