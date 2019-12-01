@@ -320,6 +320,11 @@ function render (player) {
   ctx.font = "16px Arial";
   ctx.fillStyle = "rgb(200, 200, 200)";
   ctx.fillText(player.name,player.x,player.y-30);
+  if (player.collide) {
+    ctx.font = "bold 16px Arial";
+    ctx.fillText("MICE! (" + player.score + ")",player.x,player.y-65);
+    ctx.font = "16px Arial";
+  }
   //ctx.fillText(player.status,player.x,player.y-20)
   // touchString = ""
   // for (i in touchList) {
@@ -347,8 +352,8 @@ function reDrawMice() {
 }
 
 function renderMouse (mouse) {
-  ctx.fillText(mouse.status + "-" + mouse.to_from_idle_frame, mouse.x, mouse.y);
-   ctx.drawImage(
+  // ctx.fillText(mouse.to_from_idle_frame, mouse.x, mouse.y);
+  ctx.drawImage(
       sprite_sheet.image,
       mouse.animation.frame * mouse.width,
       mouse.animation.frame_group * mouse.height,

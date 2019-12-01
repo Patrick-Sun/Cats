@@ -118,7 +118,9 @@ function createPlayer(room,id,name,x,y,width,height,spdX,spdY,color) {
         typing:false,
         message:"",
         message2:"",
-        messageTime:""
+        messageTime:"",
+        collideFrame: 0,
+        score: 0
     };
     roomList[room].playerList[id] = player;
 }
@@ -148,7 +150,7 @@ setInterval(function() {
             }
         }
     }
-}, 3000);
+}, 2000);
 
 setInterval(function() {
     for (room in roomList) {
@@ -164,12 +166,12 @@ setInterval(function() {
     for (room in roomList) {
         for (var i = 0; i < roomList[room].mouseList.length; i++) {
             var random = Math.floor(Math.random() * (100 - 1)) + 1;
-            if (random <= 50 && !roomList[room].mouseList[i].randTurn && !roomList[room].mouseList[i].randIdle) {
+            if (random <= 10 && !roomList[room].mouseList[i].randTurn && !roomList[room].mouseList[i].randIdle) {
                 roomList[room].mouseList[i].randIdle = true;
             }
         }
     }
-}, 800);
+}, 500);
 
 function updatePlayers() {
     for (var room in roomList) {
@@ -580,10 +582,12 @@ function updateMouse(mouse) {
         
     //bounds
         if (mouse.x > width) {
-            mouse.x = -mouse.width;
+            // mouse.x = -mouse.width;
+            mouse.collide = true;
         }
         else if(mouse.x + mouse.width < 0) {
-            mouse.x = width;
+            // mouse.x = width;
+            mouse.collide = true;
         }
     
         if (!mouse.turning && !mouse.randIdle && !mouse.idle) {
@@ -616,67 +620,13 @@ function updateMouse(mouse) {
         
     //-idle transitions
         if (mouse.to_from_idle_frame >= 14) {
-            mouse.randIdle = false;
+            if (mouse.idle) {
+                mouse.randIdle = false;
+            }
             mouse.idle = !mouse.idle;
             mouse.to_from_idle_frame = 0;
             mouse.idle_frame = 0;
-        }
-    /*
-    //- idle
-        var idle_ani_length;
-        //pick idle type
-        if (player.idle_ani_type == 1) {
-            idle_ani_length = 20;
-        } else {
-            idle_ani_length = 85;
-        }
-        //continue/end idle animation
-        if (player.idle_ani) {
-            if (player.idle_ani_frame >= idle_ani_length) {
-                player.idle_ani = false;
-                player.idle_ani_frame = 0;
-            } else {
-                player.idle_ani_frame += 1;
-                return;
-            }
-        }
-        //start idle animation
-        if (!player.idle_ani && player.idle_frame > 300 && !player.sleep) {
-            var random = Math.floor(Math.random() * (100 - 1)) + 1;
-            
-            if (random <= 70) {
-                player.idle_ani_type = 1;
-            } else {
-                player.idle_ani_type = 2;
-            }
-            
-            player.idle_ani = true;
-            player.idle_frame = 0;
-            player.idle_ani_frame = 0;
-        }
-        //play idle animation
-        if (player.idle_ani) {
-            if (player.dir == 0 ) {
-                if (player.idle_ani_type == 1) {
-                    player.status="ear_twitch_left";
-                    player.animation.change(8,sprite_sheet.frame_sets[9], 5);
-                } else {
-                    player.status="lick_left";
-                    player.animation.change(14,sprite_sheet.frame_sets[11], 5); 
-                }
-                return;
-            } else {
-                if (player.idle_ani_type == 1) {
-                    player.status="ear_twitch_right";
-                    player.animation.change(8,sprite_sheet.frame_sets[8], 5);
-                } else {
-                    player.status="lick_right";
-                    player.animation.change(13,sprite_sheet.frame_sets[11], 5); 
-                }
-                return;
-            }
-        }*/
-        
+        }      
         
     //unlocked animations
     if (mouse.randTurn) {
@@ -700,174 +650,42 @@ function updateMouse(mouse) {
 
     if (mouse.randIdle) {
         mouse.spdX *= 0.9;
-        if (mouse.dir == 0) {
-            mouse.to_from_idle_frame += 1;
-            mouse.animation.change(7,sprite_sheet.frame_sets[6], 5);
-            mouse.status="to_idle_left";
-            return;
+        if (mouse.idle) {
+            if (mouse.idle_frame <= 50) {
+                if (mouse.dir == 0) {
+                    mouse.animation.change(5,sprite_sheet.frame_sets[0], 15);
+                    mouse.status="idle_left";
+                    mouse.idle_frame += 1;
+                } else {
+                    mouse.animation.change(4,sprite_sheet.frame_sets[0], 15); 
+                    mouse.status="idle_right";
+                    mouse.idle_frame += 1;
+                }
+            } else {
+                mouse.to_from_idle_frame += 1;
+                if (mouse.dir == 1) {
+                    mouse.animation.change(6,sprite_sheet.frame_sets[7], 5);
+                    mouse.status="from_idle_right";
+                } else {
+                    mouse.animation.change(7,sprite_sheet.frame_sets[7], 5);
+                    mouse.status="from_idle_left";
+                }
+                return;
+            }
         } else {
-            mouse.to_from_idle_frame += 1;
-            mouse.animation.change(6,sprite_sheet.frame_sets[6], 5); 
-            mouse.status="to_idle_right";
-            return;
-        }
-    }
-
-    if (mouse.idle) {
-        mouse.spdX *= 0.9;
-        if (mouse.idle_frame <= 50) {
             if (mouse.dir == 0) {
-                mouse.animation.change(5,sprite_sheet.frame_sets[0], 15);
-                mouse.status="idle_left";
-                mouse.idle_frame += 1;
+                mouse.to_from_idle_frame += 1;
+                mouse.animation.change(7,sprite_sheet.frame_sets[6], 5);
+                mouse.status="to_idle_left";
+                return;
             } else {
-                mouse.animation.change(4,sprite_sheet.frame_sets[0], 15); 
-                mouse.status="idle_right";
-                mouse.idle_frame += 1;
+                mouse.to_from_idle_frame += 1;
+                mouse.animation.change(6,sprite_sheet.frame_sets[6], 5); 
+                mouse.status="to_idle_right";
+                return;
             }
-        } else {
-            mouse.to_from_idle_frame += 1;
-            if (mouse.dir == 1) {
-                mouse.animation.change(6,sprite_sheet.frame_sets[7], 5);
-                mouse.status="from_idle_right";
-            } else {
-                mouse.animation.change(7,sprite_sheet.frame_sets[7], 5);
-                mouse.status="from_idle_left";
-            }
-            return;
         }
     }
-    /*
-    //- go left
-        if (player.controller.leftActive) {
-            if (player.idle & !player.jumping) {
-                player.to_from_idle_frame += 1;
-                if (player.dir == 1) {
-                    player.animation.change(6,sprite_sheet.frame_sets[7], 5);
-                    player.status="from_idle_right";
-                } else {
-                    player.animation.change(7,sprite_sheet.frame_sets[7], 5);
-                    player.status="from_idle_left";
-                }
-                return;
-            } else {
-                if (player.dir == 0 & !player.idle) {
-                    player.spdX -= 0.5;
-                }
-                if (!player.jumping) {
-                    if (player.dir == 0) {
-                        player.status="walk_left";
-                        player.animation.change(1,sprite_sheet.frame_sets[3], 5);
-                    } else {
-                        player.status="turn_left";
-                        player.turning = true
-                        player.animation.change(2,sprite_sheet.frame_sets[4], 3);
-                        player.dir = 0;
-                        return;
-                    }
-                }
-            }
-        }
-    //- go right
-        if (player.controller.rightActive) {
-            if (player.idle & !player.jumping) {
-                player.to_from_idle_frame += 1;
-                if (player.dir == 1) {
-                    player.animation.change(6,sprite_sheet.frame_sets[7], 5);
-                    player.status="from_idle_right";
-                } else {
-                    player.animation.change(7,sprite_sheet.frame_sets[7], 5);
-                    player.status="from_idle_left";
-                }
-                return;
-            } else {
-                if (player.dir == 1 & !player.idle) {
-                    player.spdX += 0.5;
-                }
-                if (!player.jumping) {
-                    if (player.dir == 1) {
-                        player.status="walk_right";
-                        player.animation.change(0,sprite_sheet.frame_sets[2], 5);	
-                    } else {
-                        player.status="turn_right";
-                        player.turning = true
-                        player.animation.change(3,sprite_sheet.frame_sets[5], 3);
-                        player.dir = 1;
-                        return;
-                    }
-                }
-            }
-        }
-        
-    //- start/continue still_idle
-        if (!player.controller.leftActive && !player.controller.rightActive && !player.jumping && !player.turning && !player.sleep) {
-            player.spdX *= 0.9;
-            if (player.idle) {
-                if (player.dir == 0) {
-                    player.animation.change(5,sprite_sheet.frame_sets[0], 15);
-                    //player.status="idle_left - ".concat(player.idle_frame);
-                    player.status="idle_left";
-                    player.idle_frame += 1;
-                } else {
-                    player.animation.change(4,sprite_sheet.frame_sets[0], 15); 
-                    //player.status="idle_right - ".concat(player.idle_frame);
-                    player.status="idle_right";
-                    player.idle_frame += 1;
-                }
-            } else {
-                if (player.dir == 0) {
-                    player.to_from_idle_frame += 1;
-                    player.animation.change(7,sprite_sheet.frame_sets[6], 5);
-                    player.status="to_idle_left";
-                    return;
-                } else {
-                    player.to_from_idle_frame += 1;
-                    player.animation.change(6,sprite_sheet.frame_sets[6], 5); 
-                    player.status="to_idle_right";
-                    return;
-                }
-            }
-        }
-        
-    //- jump	
-        //start jump
-        if (player.controller.upActive && !player.jumping && !player.turning && !player.idle_ani) {
-            player.controller.upActive = false;
-            player.jumping = true;
-            //player.idle = false;
-            player.spdY -=24;
-        }
-        
-        //play jump
-        if (player.jumping) {
-            if (player.idle) {
-                if (player.dir == 0 ) {
-                    player.status="idle_jump_left";
-                    player.spdX -= 0.5;
-                    player.animation.change(12,sprite_sheet.frame_sets[10], 3);
-                    player.idle_frame = 0;
-                    return;
-                } else {
-                    player.status="idle_jump_right";
-                    player.spdX += 0.5;
-                    player.animation.change(11,sprite_sheet.frame_sets[1], 3); 
-                    player.idle_frame = 0
-                    return;
-                }
-            } else {
-                if (player.dir == 0 ) {
-                    player.status="jump_left";
-                    player.spdX -= 0.5;
-                    player.animation.change(10,sprite_sheet.frame_sets[10], 3);
-                    return;
-                } else {
-                    player.status="jump_right";
-                    player.spdX += 0.5;
-                    player.animation.change(9,sprite_sheet.frame_sets[1], 3); 
-                    return;
-                }
-            }
-        }*/
 }
 
 function detectCollision() {
@@ -880,6 +698,8 @@ function detectCollision() {
                 if (((roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer >= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width)) && ((roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer >= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height))) {
                     if (roomList[room].playerList[player].jumping && roomList[room].playerList[player].spdY > 0) {
                         roomList[room].mouseList[i].collide = true;
+                        roomList[room].playerList[player].collide = true;
+                        roomList[room].playerList[player].score += 1;
                     }
                 }
             }
@@ -889,6 +709,14 @@ function detectCollision() {
                 }
             }
             roomList[room].mouseList = tempMouseList;
+        }
+        if (roomList[room].playerList[player].collide) {
+            if (roomList[room].playerList[player].collideFrame <= 40) {
+                roomList[room].playerList[player].collideFrame += 1;
+            } else {
+                roomList[room].playerList[player].collideFrame = 0
+                roomList[room].playerList[player].collide = false;
+            }    
         }
     }
 }
