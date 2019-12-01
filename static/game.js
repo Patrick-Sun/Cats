@@ -19,22 +19,22 @@ socket.on('connect', function() {
 });
 
 var sprite_sheet = {
-  frame_sets:[[0,1,2,1],                  //0.idle        [4|5]
-              [0,1,2,3,4,5,6],			//1.jump right  [9|11]
-              [0,1,2,3,4,5,6,7],          //2.walk right  [0]
-              [7,6,5,4,3,2,1,0],          //3.walk left   [1]
-              [0,1,2,3,4,4,4,4,4],        //4.turn left   [2]
-              [0,1,2,3,4,4,4,4,4],        //5.turn right  [3]
-              [0,1,2,3,3,3],              //6.to idle right [6|7]
-              [3,2,1,0,0,0],              //7.from idle right [6|7]
-              [0,1,0,1],          		//8.ear twitch right (idle_1) [8]
-              [2,3,2,3],          		//9.ear twitch left (idle_1) [8] 
-              [6,5,4,3,2,1,0],			//10.jump left 	[10|12]
-              [0,1,2,3,3,4,5,6,7,7,8,9,10,11,12,1,0],//11.lick [13|14]
-              [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],//12.to sleep right [15]
-              [0,0,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],//13.sleep right [16]
-              [0,1,2,3,4,5,6,7,8,9,10,11,12,13],//14.to sleep left [17]
-              [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],//15.from_sleep_right [18]
+  frame_sets:[[0,1,2,1],                                                      //0.idle        [4|5]
+              [0,1,2,3,4,5,6],			                                          //1.jump right  [9|11]
+              [0,1,2,3,4,5,6,7],                                              //2.walk right  [0]
+              [7,6,5,4,3,2,1,0],                                              //3.walk left   [1]
+              [0,1,2,3,4,4,4,4,4],                                            //4.turn left   [2]
+              [0,1,2,3,4,4,4,4,4],                                            //5.turn right  [3]
+              [0,1,2,3,3,3],                                                  //6.to idle right [6|7]
+              [3,2,1,0,0,0],                                                  //7.from idle right [6|7]
+              [0,1,0,1],          		                                        //8.ear twitch right (idle_1) [8]
+              [2,3,2,3],          		                                        //9.ear twitch left (idle_1) [8] 
+              [6,5,4,3,2,1,0],			                                          //10.jump left 	[10|12]
+              [0,1,2,3,3,4,5,6,7,7,8,9,10,11,12,1,0],                         //11.lick [13|14]
+              [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],               //12.to sleep right [15]
+              [0,0,0,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],   //13.sleep right [16]
+              [0,1,2,3,4,5,6,7,8,9,10,11,12,13],                              //14.to sleep left [17]
+              [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],        //15.from_sleep_right [18]
   image:new Image()
 };
 var controller = {
@@ -106,19 +106,12 @@ var controller = {
   }
 };
 var version = "3.0";
-// socket.on('state', function(playerList) {
-//   console.log(Object.keys(playerList).length);
-//   // for (var id in playerList) {
-//   //   var player = playerList[id];
-//   //   console.log(player.id);
-//   // }
-// });
 
-
-socket.on('state_' + room, function(playerList) {
-    localPlayerList = playerList;
-    // updatePlayers();
+socket.on('state_' + room, function(room) {
+    localPlayerList = room.playerList;
+    localMouseList = room.mouseList;
     reDrawPlayers();
+    reDrawMice();
 });
 
 var canvas = document.getElementById("ctx");
@@ -129,6 +122,7 @@ ctx.fillText('Loading',50,50);
 var height = 300;
 var width = 1000;
 var localPlayerList = {};
+var localMouseList = [];
 var touchList = [];
 
 sprite_sheet.image.src = "/static/cat_sprite_orange.png";
@@ -343,4 +337,25 @@ function render (player) {
       Math.floor(player.y),
       player.width,
       player.height);
+};
+
+/*WIP*/
+function reDrawMice() {
+  for (var mouse in localMouseList) {
+    renderMouse(localMouseList[mouse]);
+  }
+}
+
+function renderMouse (mouse) {
+  ctx.fillText(mouse.status + "-" + mouse.to_from_idle_frame, mouse.x, mouse.y);
+   ctx.drawImage(
+      sprite_sheet.image,
+      mouse.animation.frame * mouse.width,
+      mouse.animation.frame_group * mouse.height,
+      mouse.width,
+      mouse.height,
+      Math.floor(mouse.x),
+      Math.floor(mouse.y),
+      mouse.width,
+      mouse.height);
 };
