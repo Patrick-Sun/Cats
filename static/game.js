@@ -318,13 +318,9 @@ function render (player) {
   }
   
   ctx.font = "16px Arial";
-  ctx.fillStyle = "rgb(200, 200, 200)";
-  ctx.fillText(player.name,player.x,player.y-30);
-  if (player.collide) {
-    ctx.font = "bold 16px Arial";
-    ctx.fillText("MICE! (" + player.score + ")",player.x,player.y-65);
-    ctx.font = "16px Arial";
-  }
+  ctx.fillStyle = "rgb(160, 160, 160)";
+  ctx.fillText("[" + player.score + "] " + player.name,player.x,player.y-30);
+
   //ctx.fillText(player.status,player.x,player.y-20)
   // touchString = ""
   // for (i in touchList) {
@@ -347,20 +343,25 @@ function render (player) {
 /*WIP*/
 function reDrawMice() {
   for (var mouse in localMouseList) {
-    renderMouse(localMouseList[mouse]);
+      renderMouse(localMouseList[mouse]);
   }
 }
 
 function renderMouse (mouse) {
-  // ctx.fillText(mouse.to_from_idle_frame, mouse.x, mouse.y);
-  ctx.drawImage(
-      sprite_sheet.image,
-      mouse.animation.frame * mouse.width,
-      mouse.animation.frame_group * mouse.height,
-      mouse.width,
-      mouse.height,
-      Math.floor(mouse.x),
-      Math.floor(mouse.y),
-      mouse.width,
-      mouse.height);
+  if (mouse.collide) {
+    ctx.font = "bold 16px Arial";
+    ctx.fillStyle = "rgb(120, 120, 120)";
+    ctx.fillText("MICE!",mouse.x + 20,mouse.y + 30);
+  } else {
+    ctx.drawImage(
+        sprite_sheet.image,
+        mouse.animation.frame * 120,
+        mouse.animation.frame_group * 80,
+        120,
+        80,
+        Math.floor(mouse.x),
+        Math.floor(mouse.y),
+        mouse.width,
+        mouse.height);
+  }
 };

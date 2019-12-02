@@ -119,7 +119,6 @@ function createPlayer(room,id,name,x,y,width,height,spdX,spdY,color) {
         message:"",
         message2:"",
         messageTime:"",
-        collideFrame: 0,
         score: 0
     };
     roomList[room].playerList[id] = player;
@@ -136,17 +135,17 @@ setInterval(function() {
 
 setInterval(function() {
     for (room in roomList) {
-        if (roomList[room].mouseList.length < 3) {
+        if (roomList[room].mouseList.length < 5) {
             var random = Math.floor(Math.random() * (100 - 1)) + 1;
-            if (random <= 30) {
+            if (random <= 50) {
                 direction = Math.round(Math.random());
 
                 if (direction == 1) {
-                    createMouse(room,-120,height-100,120,80,5,direction);
+                    createMouse(room,-60,height-20-40,60,40,5,direction);
                 } else {
-                    createMouse(room,width,height-100,120,80,-5,direction);
+                    createMouse(room,width,height-20-40,60,40,-5,direction);
                 }
-                console.log("Created Mouse in room [" + room + "]");
+                // console.log("Created Mouse in room [" + room + "]");
             }
         }
     }
@@ -558,6 +557,8 @@ function createMouse(room,x,y,width,height,spdX,dir) {
         status:"loading...",
         randTurn:false,
         randIdle:false,
+        collideFrame: 0,
+        kill:false
     };
     roomList[room].mouseList.push(mouse);
 }
@@ -565,12 +566,16 @@ function createMouse(room,x,y,width,height,spdX,dir) {
 function updateMice() {
     for (var room in roomList) {
         for (var mouse in roomList[room].mouseList) {
-            updateMouse(roomList[room].mouseList[mouse]);
+            if (!roomList[room].mouseList[mouse].collide) {
+                updateMouse(roomList[room].mouseList[mouse]);
+            }
         }
     }
     for (var room in roomList) {
         for (var mouse in roomList[room].mouseList) {
-            roomList[room].mouseList[mouse].animation.update();
+            if (!roomList[room].mouseList[mouse].collide) {
+                roomList[room].mouseList[mouse].animation.update();
+            }
         }
     }
 }
@@ -697,26 +702,33 @@ function detectCollision() {
             for (var i = 0; i < roomList[room].mouseList.length; i++) {
                 if (((roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer >= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width)) && ((roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer >= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height))) {
                     if (roomList[room].playerList[player].jumping && roomList[room].playerList[player].spdY > 0) {
-                        roomList[room].mouseList[i].collide = true;
-                        roomList[room].playerList[player].collide = true;
-                        roomList[room].playerList[player].score += 1;
+                        if (!roomList[room].mouseList[i].collide) {
+                            roomList[room].mouseList[i].collide = true;
+                            roomList[room].playerList[player].collide = true;
+                            roomList[room].playerList[player].score += 1;
+                        }
                     }
                 }
             }
-            for (var i = 0; i < roomList[room].mouseList.length; i++) {
-                if (!roomList[room].mouseList[i].collide) {
-                    tempMouseList.push(roomList[room].mouseList[i]);
-                }
+        }
+
+        for (var i = 0; i < roomList[room].mouseList.length; i++) {
+            if (roomList[room].mouseList[i].collide) {
+                if (roomList[room].mouseList[i].collideFrame <= 40) {
+                    roomList[room].mouseList[i].collideFrame += 1;
+                } else {
+                    roomList[room].mouseList[i].collideFrame = 0
+                    roomList[room].mouseList[i].kill = true;
+                }    
             }
-            roomList[room].mouseList = tempMouseList;
         }
-        if (roomList[room].playerList[player].collide) {
-            if (roomList[room].playerList[player].collideFrame <= 40) {
-                roomList[room].playerList[player].collideFrame += 1;
-            } else {
-                roomList[room].playerList[player].collideFrame = 0
-                roomList[room].playerList[player].collide = false;
-            }    
+
+        for (var i = 0; i < roomList[room].mouseList.length; i++) {
+            
+            if (!roomList[room].mouseList[i].kill) {
+                tempMouseList.push(roomList[room].mouseList[i]);
+            }
         }
+        roomList[room].mouseList = tempMouseList;
     }
 }
