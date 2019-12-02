@@ -588,11 +588,11 @@ function updateMouse(mouse) {
     //bounds
         if (mouse.x > width) {
             // mouse.x = -mouse.width;
-            mouse.collide = true;
+            mouse.kill = true;
         }
         else if(mouse.x + mouse.width < 0) {
             // mouse.x = width;
-            mouse.collide = true;
+            mouse.kill = true;
         }
     
         if (!mouse.turning && !mouse.randIdle && !mouse.idle) {

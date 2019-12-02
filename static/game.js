@@ -349,8 +349,12 @@ function reDrawMice() {
 
 function renderMouse (mouse) {
   if (mouse.collide) {
+    ctx.strokeStyle = "rgb(60, 60, 60)"
+    ctx.fillStyle = "rgb(60, 60, 60)"
+    roundRect(ctx, mouse.x+10, mouse.y+10, 63, 27)
+    ctx.fill();
     ctx.font = "bold 16px Arial";
-    ctx.fillStyle = "rgb(120, 120, 120)";
+    ctx.fillStyle = "rgb(255, 255, 255)";
     ctx.fillText("MICE!",mouse.x + 20,mouse.y + 30);
   } else {
     ctx.drawImage(
