@@ -128,9 +128,9 @@ setInterval(function() {
     updatePlayers();
     updateMice();
     detectCollision();
-    for (room in roomList) {
-        io.sockets.emit('state_' + room, roomList[room]);
-    }
+    // for (room in roomList) {
+    //     io.sockets.emit('state_' + room, roomList[room]);
+    // }
 }, 15);
 
 setInterval(function() {
