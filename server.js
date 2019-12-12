@@ -128,16 +128,16 @@ setInterval(function() {
     updatePlayers();
     updateMice();
     detectCollision();
-    // for (room in roomList) {
-    //     io.sockets.emit('state_' + room, roomList[room]);
-    // }
-}, 15);
-
-setInterval(function() {
     for (room in roomList) {
         io.sockets.emit('state_' + room, roomList[room]);
     }
-}, 75);
+}, 15);
+
+// setInterval(function() {
+//     for (room in roomList) {
+//         io.sockets.emit('state_' + room, roomList[room]);
+//     }
+// }, 75);
 
 setInterval(function() {
     for (room in roomList) {
