@@ -135,15 +135,21 @@ setInterval(function() {
 
 setInterval(function() {
     for (room in roomList) {
+        io.sockets.emit('state_' + room, roomList[room]);
+    }
+}, 75);
+
+setInterval(function() {
+    for (room in roomList) {
         if (roomList[room].mouseList.length < 5) {
             var random = Math.floor(Math.random() * (100 - 1)) + 1;
             if (random <= 50) {
                 direction = Math.round(Math.random());
 
                 if (direction == 1) {
-                    createMouse(room,-60,height-20-40,60,40,5,direction);
+                    createMouse(room,-60,height-20-40,60,40,4,direction);
                 } else {
-                    createMouse(room,width,height-20-40,60,40,-5,direction);
+                    createMouse(room,width,height-20-40,60,40,-4,direction);
                 }
                 // console.log("Created Mouse in room [" + room + "]");
             }
@@ -597,11 +603,11 @@ function updateMouse(mouse) {
     
         if (!mouse.turning && !mouse.randIdle && !mouse.idle) {
             if (mouse.dir == 0) {
-                mouse.spdX -= 0.5;
+                mouse.spdX -= 0.4;
                 mouse.status="walk_left";
                 mouse.animation.change(1,sprite_sheet.frame_sets[3], 5);
             } else {
-                mouse.spdX += 0.5;
+                mouse.spdX += 0.4;
                 mouse.status="walk_right";
                 mouse.animation.change(0,sprite_sheet.frame_sets[2], 5);	
             }
@@ -699,6 +705,7 @@ function detectCollision() {
     for (room in roomList) {
         var tempMouseList = [];
         for (player in roomList[room].playerList) {
+            roomList[room].playerList[player].collide = false;
             for (var i = 0; i < roomList[room].mouseList.length; i++) {
                 if (((roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer <= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer >= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width) || (roomList[room].playerList[player].x + xBuffer >= roomList[room].mouseList[i].x && roomList[room].playerList[player].x + roomList[room].playerList[player].width - xBuffer <= roomList[room].mouseList[i].x + roomList[room].mouseList[i].width)) && ((roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer <= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer >= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height) || (roomList[room].playerList[player].y + yBuffer >= roomList[room].mouseList[i].y && roomList[room].playerList[player].y + roomList[room].playerList[player].height - yBuffer <= roomList[room].mouseList[i].y + roomList[room].mouseList[i].height))) {
                     if (roomList[room].playerList[player].jumping && roomList[room].playerList[player].spdY > 0) {

@@ -134,6 +134,18 @@ window.addEventListener("touchend", controller.touchHandler);
 
 function reDrawPlayers() {
   ctx.clearRect(0,0,width,height)
+  //draw ground
+  ctx.strokeStyle = "rgb(230, 230, 230)"
+  ctx.moveTo(0, height-42);
+  ctx.lineTo(width, height-42);
+  ctx.stroke();
+
+
+  for (var mouse in localMouseList) {
+    if (!localMouseList[mouse].collide) {
+      reDrawMiceShadow(localMouseList[mouse]);
+    }
+  }
 
   for (var key in localPlayerList) {
     reDrawShadow(localPlayerList[key]);
@@ -167,11 +179,6 @@ function reDrawUI(player) {
   // ctx.fillText(">",63,58);
   // ctx.font = "20px Arial"
   // ctx.fillText("^",98,63);
-  //draw ground
-  ctx.strokeStyle = "rgb(230, 230, 230)"
-  ctx.moveTo(0, height-42);
-  ctx.lineTo(width, height-42);
-  ctx.stroke();
 
   //draw ui
   if (controller.left.active) {
@@ -316,7 +323,8 @@ function render (player) {
       }
     }
   }
-  
+
+
   ctx.font = "16px Arial";
   ctx.fillStyle = "rgb(160, 160, 160)";
   ctx.fillText("[" + player.score + "] " + player.name,player.x,player.y-30);
@@ -343,20 +351,31 @@ function render (player) {
 /*WIP*/
 function reDrawMice() {
   for (var mouse in localMouseList) {
-      renderMouse(localMouseList[mouse]);
+    renderMouse(localMouseList[mouse]);
   }
 }
 
 function renderMouse (mouse) {
   if (mouse.collide) {
+
+
+    if (mouse.collideFrame <= 20) {
+      effectRadius = mouse.collideFrame * 2 * 2;
+      ctx.fillStyle = "rgba(255, 120, 120, " + ((40-(mouse.collideFrame * 2))/40) + ")";
+      drawEllipse(ctx, mouse.x + (mouse.width/2) - effectRadius, mouse.y + (mouse.height/2) - effectRadius, effectRadius*2, effectRadius*2);
+    }
+
+
+
     ctx.strokeStyle = "rgb(60, 60, 60)"
     ctx.fillStyle = "rgb(60, 60, 60)"
-    roundRect(ctx, mouse.x+10, mouse.y+10, 63, 27)
+    roundRect(ctx, mouse.x, mouse.y+10, 63, 27)
     ctx.fill();
     ctx.font = "bold 16px Arial";
     ctx.fillStyle = "rgb(255, 255, 255)";
-    ctx.fillText("MICE!",mouse.x + 20,mouse.y + 30);
+    ctx.fillText("MICE!",mouse.x + 10,mouse.y + 30);
   } else {
+
     ctx.drawImage(
         sprite_sheet.image,
         mouse.animation.frame * 120,
@@ -369,3 +388,9 @@ function renderMouse (mouse) {
         mouse.height);
   }
 };
+function reDrawMiceShadow(mouse) {
+  //draw shadow
+  ctx.fillStyle = "rgb(240, 240, 240)";
+  drawEllipse(ctx, mouse.x+(mouse.width/2)-(50*(1-(height-100-mouse.y)/(height-100)))/2, height-24-(8*(1-(height-100-(50)-mouse.y)/(height-100-(50))))/2, 50*(1-(height-100-mouse.y)/(height-100)), 8*(1-(height-100-(50)-mouse.y)/(height-100-(50))));
+}
+
