@@ -158,9 +158,9 @@ function reDrawPlayers() {
     if (key != playerName) {
       render(localPlayerList[key]);
     }
-    if (localPlayerList[playerName]) {
-      render(localPlayerList[playerName]);
-    }
+  }
+  if (localPlayerList[playerName]) {
+    render(localPlayerList[playerName]);
   }
 }
 
