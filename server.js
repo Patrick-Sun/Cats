@@ -145,11 +145,10 @@ setInterval(function() {
             var random = Math.floor(Math.random() * (100 - 1)) + 1;
             if (random <= 50) {
                 direction = Math.round(Math.random());
-
                 if (direction == 1) {
-                    createMouse(room,-60,height-20-40,60,40,4,direction);
+                    createMouse(room,-80,height-20-50,80,50,4,direction);
                 } else {
-                    createMouse(room,width,height-20-40,60,40,-4,direction);
+                    createMouse(room,width,height-20-50,80,50,-4,direction);
                 }
                 // console.log("Created Mouse in room [" + room + "]");
             }
@@ -486,8 +485,8 @@ var sprite_sheet = {
                 [7,6,5,4,3,2,1,0],          //3.walk left   [1]
                 [0,1,2,3,4,4,4,4,4],        //4.turn left   [2]
                 [0,1,2,3,4,4,4,4,4],        //5.turn right  [3]
-                [0,1,2,3,3,3],              //6.to idle right [6|7]
-                [3,2,1,0,0,0],              //7.from idle right [6|7]
+                [0,1,2,3,3,3],              //6.to idle [6|7]
+                [3,2,1,0,0,0],              //7.from idle [6|7]
                 [0,1,0,1],          		//8.ear twitch right (idle_1) [8]
                 [2,3,2,3],          		//9.ear twitch left (idle_1) [8] 
                 [6,5,4,3,2,1,0],			//10.jump left 	[10|12]
@@ -497,6 +496,17 @@ var sprite_sheet = {
                 [0,1,2,3,4,5,6,7,8,9,10,11,12,13],//14.to sleep left [17]
                 [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]],//15.from_sleep_right [18]
 };
+
+var sprite_sheet_mice = {
+    frame_sets:[[0,1,2,1],                                                      //0.idle        [4|5]
+                [0,1,2,3,4,5,6,7],                                              //1.walk right  [0]
+                [7,6,5,4,3,2,1,0],                                              //2.walk left   [1]
+                [0,1,2,3,4,4],                                                  //3.turn left   [2]
+                [0,1,2,3,4,4],                                                  //4.turn right  [3]
+                [0,1,2,3,3],                                                    //5.to idle right [6] | from idle left [7]
+                [3,2,1,0,0]],                                                   //6.to idle left [7] | from idle right [6]                                                       
+};
+
 var Controller = function() {
     this.leftActive = false;
     this.leftState = false;
@@ -605,11 +615,11 @@ function updateMouse(mouse) {
             if (mouse.dir == 0) {
                 mouse.spdX -= 0.4;
                 mouse.status="walk_left";
-                mouse.animation.change(1,sprite_sheet.frame_sets[3], 5);
+                mouse.animation.change(1,sprite_sheet_mice.frame_sets[2], 3);
             } else {
                 mouse.spdX += 0.4;
                 mouse.status="walk_right";
-                mouse.animation.change(0,sprite_sheet.frame_sets[2], 5);	
+                mouse.animation.change(0,sprite_sheet_mice.frame_sets[1], 3);	
             }
         }
     
@@ -645,14 +655,14 @@ function updateMouse(mouse) {
         if (mouse.dir == 1) {
             mouse.status="turn_left";
             mouse.turning = true
-            mouse.animation.change(2,sprite_sheet.frame_sets[4], 3);
+            mouse.animation.change(2,sprite_sheet_mice.frame_sets[3], 3);
             mouse.dir = 0;
             mouse.spdX = -mouse.spdX
             return;
         } else {
             mouse.status="turn_right";
             mouse.turning = true
-            mouse.animation.change(3,sprite_sheet.frame_sets[5], 3);
+            mouse.animation.change(3,sprite_sheet_mice.frame_sets[4], 3);
             mouse.dir = 1;
             mouse.spdX = -mouse.spdX
             return;
@@ -664,21 +674,21 @@ function updateMouse(mouse) {
         if (mouse.idle) {
             if (mouse.idle_frame <= 50) {
                 if (mouse.dir == 0) {
-                    mouse.animation.change(5,sprite_sheet.frame_sets[0], 15);
+                    mouse.animation.change(5,sprite_sheet_mice.frame_sets[0], 15);
                     mouse.status="idle_left";
                     mouse.idle_frame += 1;
                 } else {
-                    mouse.animation.change(4,sprite_sheet.frame_sets[0], 15); 
+                    mouse.animation.change(4,sprite_sheet_mice.frame_sets[0], 15); 
                     mouse.status="idle_right";
                     mouse.idle_frame += 1;
                 }
             } else {
                 mouse.to_from_idle_frame += 1;
                 if (mouse.dir == 1) {
-                    mouse.animation.change(6,sprite_sheet.frame_sets[7], 5);
+                    mouse.animation.change(6,sprite_sheet_mice.frame_sets[6], 5);
                     mouse.status="from_idle_right";
                 } else {
-                    mouse.animation.change(7,sprite_sheet.frame_sets[7], 5);
+                    mouse.animation.change(7,sprite_sheet_mice.frame_sets[5], 5);
                     mouse.status="from_idle_left";
                 }
                 return;
@@ -686,12 +696,12 @@ function updateMouse(mouse) {
         } else {
             if (mouse.dir == 0) {
                 mouse.to_from_idle_frame += 1;
-                mouse.animation.change(7,sprite_sheet.frame_sets[6], 5);
+                mouse.animation.change(7,sprite_sheet_mice.frame_sets[6], 5);
                 mouse.status="to_idle_left";
                 return;
             } else {
                 mouse.to_from_idle_frame += 1;
-                mouse.animation.change(6,sprite_sheet.frame_sets[6], 5); 
+                mouse.animation.change(6,sprite_sheet_mice.frame_sets[5], 5); 
                 mouse.status="to_idle_right";
                 return;
             }
@@ -700,7 +710,7 @@ function updateMouse(mouse) {
 }
 
 function detectCollision() {
-    var xBuffer = 30
+    var xBuffer = 10
     var yBuffer = 10;
     for (room in roomList) {
         var tempMouseList = [];
