@@ -354,11 +354,11 @@ function renderMouse (mouse) {
 
     ctx.strokeStyle = "rgb(60, 60, 60)"
     ctx.fillStyle = "rgb(60, 60, 60)"
-    roundRect(ctx, mouse.x, mouse.y+10, 63, 27)
+    roundRect(ctx, mouse.x + 10, mouse.y + 20, 63, 27)
     ctx.fill();
     ctx.font = "bold 16px Arial";
     ctx.fillStyle = "rgb(255, 255, 255)";
-    ctx.fillText("MICE!",mouse.x + 10,mouse.y + 30);
+    ctx.fillText("MICE!",mouse.x + 20,mouse.y + 40);
   } else {
     ctx.drawImage(
         sprite_sheet_mice,
